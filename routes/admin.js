@@ -1,18 +1,17 @@
 const express = require('express')
 const { read } = require('fs')
 const router = express.Router()
-
 const mongoose = require("mongoose")
+
 require("../models/Categoria")
 const Categoria = mongoose.model("categoria")
+
+require("../models/Postagem")
+const Postagem = mongoose.model("postagem")
 
 
 router.get("/", (req, res) => {
     res.send("pagina admin")
-})
-
-router.get("/posts", (req, res) => {
-    res.send("pagina admin de posts")
 })
 
 router.get("/categorias", (req, res) => {
@@ -105,4 +104,95 @@ router.post("/categorias/excluir", (req, res) => {
         res.redirect("/admin/categorias")
     })
 })
+
+router.get("/postagens",(req, res) => {
+    Postagem.find().populate("categoria").sort({create_date_time: "desc"}).then((postagens) => {
+        res.render("admin/postagens", {postagens: postagens.map(function(e){
+            let p = copy(e)
+            p.categoria = copy(e.categoria)
+            return p
+        })})
+        
+    }).catch((error) => {
+        req.flash("error_msg", "Ocorreu um erro ao carregar postagens"+ error)
+    })
+})
+
+router.get("/postagens/add",(req, res) => {
+    Categoria.find().then((categorias) => {
+        const cat = categorias.map((e) => { return { nome: e.nome, _id: e._id } })
+        res.render("admin/postagem", { categorias: cat })
+    }).catch((error) => {
+        req.flash("error_msg", "Ocorreu um erro ao carregar categorias")
+    })
+})
+router.post("/postagens/adicionar", (req, res) => {
+    console.log(req.body.categoria);
+    const novaPostagem = {
+        titulo: req.body.titulo,
+        slug: req.body.slug,
+        descricao: req.body.descricao,
+        conteudo: req.body.conteudo,
+        categoria: req.body.categoria,
+    }
+    new Postagem(novaPostagem).save().then(() => {
+        req.flash("success_msg", "Postagem adicionada com sucesso")
+        res.redirect("/admin/postagens")
+    }).catch((error) => {
+        req.flash("error_msg", "Ocorreu um erro ao adicionar postagem" + error)
+        res.redirect("/admin/postagens")
+    })
+})
+
+router.get("/postagens/editar/:id",(req, res) => {
+    Postagem.findById(req.params.id).then((postagem) => {
+        Categoria.find().then((categorias) => {
+            const cat = categorias.map((e) => { return { nome: e.nome, _id: e._id, selecionado: e._id.valueOf() == postagem.categoria.valueOf() } })
+            console.log(cat);
+            res.render("admin/postagem_editar", { postagem: copy(postagem), categorias: cat })
+        }).catch((error) => {
+            req.flash("error_msg", "Ocorreu um erro ao carregar categorias")
+        })
+    }).catch((error) => {
+        req.flash("error_msg", "Ocorreu um erro ao recuperar postagem")
+    })
+
+    
+})
+
+router.post("/postagens/editar", (req, res) => {
+     Postagem.findById(req.body.id).then((postagem) => {
+
+        postagem.titulo = req.body.titulo
+        postagem.slug = req.body.slug
+        postagem.descricao = req.body.descricao
+        postagem.conteudo = req.body.conteudo
+        postagem.categoria = req.body.categoria
+
+        postagem.save().then(() => {
+            req.flash("success_msg", "postagem editada com sucesso!")
+            res.redirect("/admin/postagens")
+        }).catch((error) => {
+            req.flash("error_msg", "Ocorreu um erro ao editar postagem")
+            res.redirect("/admin/postagens")
+        })
+
+    }).catch((error) => {
+        req.flash("error_msg", "Ocorreu um erro ao recuperar postagem")
+    });
+})
+
+router.get("/postagens/excluir/:id",(req, res) => {
+    Postagem.deleteOne({_id: req.params.id}).then((categorias) => {
+        req.flash("error_msg", "Postagem excluida com sucesso")
+        res.redirect("/admin/postagens")
+    }).catch((error) => {
+        req.flash("error_msg", "Ocorreu um erro ao excluir postagem" + error)
+        res.redirect("/admin/postagens")
+    })
+   
+
+    
+})
+
 module.exports = router;
