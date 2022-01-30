@@ -1,10 +1,9 @@
-<h1>Example App: Home</h1>
+<h1>{{categoria.nome}}</h1>
 {{#each postagens}}
 <div class="card mt-4">
     <div class="card-body">
         <h4>{{titulo}}</h4>
         <h4>{{descricao}}</h4>
-        <p>{{categoria.nome}}</p>
         <a href="/postagem/{{slug}}"><p>ver mais...</p></a>
     </div>
 </div>
