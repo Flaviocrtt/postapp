@@ -1,0 +1,16 @@
+{{#each erros}}
+<div class="alert alert-danger">{{texto}}</div>
+{{/each}}
+
+<form action="/usuario/salvar" method="post">
+    <label for="nome">Nome</label>
+    <input type="text" name="nome" id="nome" class="form-control" required value="{{body.nome}}" />
+    <label for="email">Email</label>
+    <input type="text" name="email" id="email" class="form-control" required  value="{{body.email}}"/>
+    <label for="senha">Senha</label>
+    <input type="password" name="senha" id="senha" class="form-control" required value="{{body.senha}}"/>
+    <label for="senha2">Repita a senha</label>
+    <input type="password" name="senha2" id="senha2" class="form-control" required value="{{body.senha2}}"/>
+    
+    <button type="submit" class="btn btn-success">Ok</button>
+</form>

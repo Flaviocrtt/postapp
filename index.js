@@ -1,7 +1,8 @@
 const express = require("express")
 var bodyParser = require('body-parser')
 const { engine } = require('express-handlebars')
-const admin = require("./routes/admin")
+const adminRoute = require("./routes/admin")
+const usuarioRoute = require("./routes/usuario")
 const path = require("path")
 const mongoose = require("mongoose")
 const session = require("express-session")
@@ -27,7 +28,8 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
-app.use('/admin', admin)
+app.use('/admin', adminRoute)
+app.use('/usuario', usuarioRoute)
 app.use(express.static(path.join(__dirname, "public")))
 
 app.engine('handlebars', engine());
