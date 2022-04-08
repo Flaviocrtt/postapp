@@ -1,7 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const mongoose = require("mongoose")
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcryptjs')
+const passport = require("passport")
 
 require("../models/Usuario")
 const UsuarioModel = mongoose.model("usuario")
@@ -19,7 +20,6 @@ router.post("/salvar", (req, res) => {
     if (erros.length > 0) {
         res.render("usuario/registro", { erros: erros, body: req.body })
     } else {
-
         UsuarioModel.findOne({ email: req.body.email }).then((usuario) => {
             if (usuario) {
                 req.flash("error_msg", "Usuário com esse email já existe.")
@@ -58,9 +58,15 @@ router.post("/salvar", (req, res) => {
             req.flash("error_msg", "Ocorreu um erro interno. " + error)
             res.redirect("/")
         })
-
     }
+})
 
+router.get("/login", (req, res, next) => {
+    res.render("usuario/login")
+})
+
+router.post("/login", (req, res, next) => {
+    passport.authenticate('local', { successRedirect: '/', failureRedirect: '/usuario/login', failureMessage: true })
 })
 
 module.exports = router
